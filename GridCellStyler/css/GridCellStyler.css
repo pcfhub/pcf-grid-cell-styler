@@ -1,0 +1,127 @@
+/*
+ * Every rule is scoped under a `gcs-` class, and that is not a naming
+ * preference: these cells are mounted *inside somebody else's grid*, which owns
+ * the row, the cell box, the selection state and the focus ring. A bare
+ * element selector here would restyle the host.
+ *
+ * Colours are literal rather than Fluent theme tokens. A cell renderer is
+ * mounted per cell with no provider above it, so there is no theme context to
+ * read from — see the manifest's platform-library comment.
+ */
+
+.gcs-cell {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0;
+    margin: 0;
+    font-weight: 400;
+    /* The cell already sets the row's line box; matching it keeps a customized
+       cell the same height as an untouched one beside it. */
+    line-height: inherit;
+}
+
+.gcs-empty {
+    color: #a19f9d;
+}
+
+.gcs-truncate {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.gcs-number {
+    font-variant-numeric: tabular-nums;
+}
+
+.gcs-high {
+    color: #0f6cbd;
+    font-weight: 600;
+}
+
+.gcs-low {
+    color: #b10e1c;
+}
+
+.gcs-yes,
+.gcs-no {
+    /* The mark carries the meaning at a glance, so it is sized up from the
+       label text beside it; the word carries it for everything that reads
+       text. */
+    font-size: 15px;
+    line-height: 1;
+}
+
+.gcs-yes {
+    color: #0e7a0b;
+}
+
+.gcs-no {
+    color: #a19f9d;
+}
+
+.gcs-pill {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 18px;
+    white-space: nowrap;
+}
+
+/* Six buckets, assigned by hash so an option keeps its colour between renders.
+   Each pair is a tinted background with text dark enough to stay legible on it
+   — the pills carry the option's own text, so they have to pass as text. */
+.gcs-pill-0 {
+    background: #eff6fc;
+    color: #0b5394;
+}
+
+.gcs-pill-1 {
+    background: #e9f7ef;
+    color: #0e6027;
+}
+
+.gcs-pill-2 {
+    background: #fdf3e7;
+    color: #8a4b08;
+}
+
+.gcs-pill-3 {
+    background: #f3eefc;
+    color: #5b2d90;
+}
+
+.gcs-pill-4 {
+    background: #fdeef0;
+    color: #94202c;
+}
+
+.gcs-pill-5 {
+    background: #eef4f4;
+    color: #0d5c63;
+}
+
+.gcs-editor {
+    width: 100%;
+}
+
+.gcs-toggle {
+    margin: 0;
+}
+
+/*
+ * The editors sit inside a cell that is already the row's height, and Fluent's
+ * own field margins would push them past it.
+ */
+.gcs-editor .ms-TextField-fieldGroup {
+    height: 28px;
+}
+
+.gcs-toggle.ms-Toggle {
+    margin-bottom: 0;
+}

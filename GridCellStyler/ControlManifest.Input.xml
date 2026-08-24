@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<manifest>
+  <!--
+    The version here is what the Power Platform upgrades on, and the release
+    workflow refuses to publish a tag that disagrees with it. Bump this in the
+    same commit as the tag.
+  -->
+  <control namespace="PCFHub"
+           constructor="GridCellStyler"
+           version="0.1.0"
+           display-name-key="GridCellStyler_Name"
+           description-key="GridCellStyler_Desc"
+           control-type="virtual">
+
+    <external-service-usage enabled="false" />
+
+    <!--
+      The control's only property, and it is not a setting.
+
+      A grid customizer is configured by being *named* on a grid, not by having
+      values set on it. The Power Apps grid generates an event name, passes it
+      in through this property, and listens on it; the control fires its cell
+      renderers and editors back through `context.factory.fireEvent(eventName,
+      …)` during `init`. Nothing else about this control is configurable, and
+      an empty value here means it does nothing at all — the platform is what
+      fills it in.
+
+      Bound rather than input because that is what the template Microsoft
+      publishes declares, and the grid binds it rather than passing a static
+      string.
+    -->
+    <property name="EventName"
+              display-name-key="EventName_Name"
+              description-key="EventName_Desc"
+              of-type="SingleLine.Text"
+              usage="bound"
+              required="true" />
+
+    <resources>
+      <code path="index.ts" order="1" />
+      <css path="css/GridCellStyler.css" order="1" />
+      <!--
+        React 16.14.0 and Fluent 8, matching the grid customizer template.
+
+        Not a nostalgic choice: the elements these overrides return are rendered
+        by whichever React instance the *host* owns, so the hooks inside them
+        have to dispatch through that same instance — which is what declaring
+        them as platform libraries guarantees. Fluent 8 in particular needs no
+        provider above it, and a cell renderer has nowhere to put one: the grid
+        mounts each returned element on its own, inside a cell.
+      -->
+      <platform-library name="React" version="16.14.0" />
+      <platform-library name="Fluent" version="8.121.1" />
+      <resx path="strings/GridCellStyler.1033.resx" version="1.0.0" />
+    </resources>
+  </control>
+</manifest>

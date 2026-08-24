@@ -1,0 +1,109 @@
+{
+    "targetEntityType": "account",
+    "title": "Active accounts",
+    "columns": [
+        {
+            "name": "name",
+            "displayName": "Account name",
+            "dataType": "SingleLine.Text",
+            "alias": "name",
+            "order": 0,
+            "visualSizeFactor": 240,
+            "isPrimary": true
+        },
+        {
+            "name": "creditlimit",
+            "displayName": "Credit limit",
+            "dataType": "Currency",
+            "alias": "creditlimit",
+            "order": 1,
+            "visualSizeFactor": 140
+        },
+        {
+            "name": "industrycode",
+            "displayName": "Industry",
+            "dataType": "OptionSet",
+            "alias": "industrycode",
+            "order": 2,
+            "visualSizeFactor": 160
+        },
+        {
+            "name": "donotemail",
+            "displayName": "Do not email",
+            "dataType": "TwoOptions",
+            "alias": "donotemail",
+            "order": 3,
+            "visualSizeFactor": 120
+        },
+        {
+            "name": "createdon",
+            "displayName": "Created on",
+            "dataType": "DateAndTime.DateOnly",
+            "alias": "createdon",
+            "order": 4,
+            "visualSizeFactor": 130
+        }
+    ],
+    "records": [
+        {
+            "id": "8f1e0a2c-0001-4c1a-9f01-0a1b2c3d4e01",
+            "values": {
+                "name": "Fabrikam Residential Holdings International",
+                "creditlimit": 250000,
+                "industrycode": "Real estate",
+                "donotemail": false,
+                "createdon": "2024-03-11"
+            }
+        },
+        {
+            "id": "8f1e0a2c-0002-4c1a-9f01-0a1b2c3d4e02",
+            "values": {
+                "name": "Contoso Ltd",
+                "creditlimit": 5000,
+                "industrycode": "Retail",
+                "donotemail": true,
+                "createdon": "2025-01-08"
+            }
+        },
+        {
+            "id": "8f1e0a2c-0003-4c1a-9f01-0a1b2c3d4e03",
+            "values": {
+                "name": "Adventure Works",
+                "creditlimit": 128500,
+                "industrycode": "Manufacturing",
+                "donotemail": false,
+                "createdon": "2023-11-02"
+            }
+        },
+        {
+            "id": "8f1e0a2c-0004-4c1a-9f01-0a1b2c3d4e04",
+            "values": {
+                "name": "Northwind Traders",
+                "creditlimit": 42000,
+                "industrycode": "Retail",
+                "donotemail": false,
+                "createdon": "2025-06-19"
+            }
+        },
+        {
+            "id": "8f1e0a2c-0005-4c1a-9f01-0a1b2c3d4e05",
+            "values": {
+                "name": "Litware Inc.",
+                "creditlimit": null,
+                "industrycode": "Consulting",
+                "donotemail": true,
+                "createdon": "2022-08-30"
+            }
+        },
+        {
+            "id": "8f1e0a2c-0006-4c1a-9f01-0a1b2c3d4e06",
+            "values": {
+                "name": "",
+                "creditlimit": 980000,
+                "industrycode": "Financial services",
+                "donotemail": false,
+                "createdon": "2026-02-14"
+            }
+        }
+    ]
+}
