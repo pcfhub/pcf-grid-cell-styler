@@ -163,6 +163,18 @@
 }
 
 /*
+ * The yes/no editor's wrapper, which exists to catch Escape and the focus
+ * leaving — a `Toggle` alone offers neither, and an editor with no way out is
+ * one the user cannot leave. It has to fill the cell for the blur to mean "the
+ * user left the cell" rather than "the user missed the toggle".
+ */
+.gcs-toggle-host {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+/*
  * The editors sit inside a cell that is already the row's height, and Fluent's
  * own field margins would push them past it. This height is the fallback:
  * `rowHeight` is optional in the customizer contract, and when the grid does
@@ -177,20 +189,54 @@
 }
 
 /*
- * Dark.
+ * Dark, chosen by the host rather than by the operating system.
  *
  * A per-cell renderer has no theme provider to read from, which is why the
- * colours above are literal — but that argument covers Fluent's *tokens*, not
- * the media query, which needs nothing above it at all. Without this block a
- * model-driven app in dark mode draws #0b5394 pill text on a #eff6fc pill
- * inside a near-black row: legible in itself, and a bright rectangle punched
- * through the middle of a dark grid.
+ * colours above are literal — but the control itself does have a context, and
+ * it publishes `data-gcs-theme` onto `:root` from
+ * `context.fluentDesignLanguage.isDarkTheme`. See `publishTheme` in index.ts.
+ *
+ * This block used to be a bare `@media (prefers-color-scheme: dark)`, which is
+ * the wrong question: a model-driven app carries its own theme and a user's OS
+ * setting says nothing about it. Asking the OS meant an OS-dark machine on a
+ * light app got `--gcs-muted: #a19f9d` on a white cell — 2.3:1, for text the
+ * light palette had deliberately raised to 4.5:1 — plus dark pills punched into
+ * a light grid.
  *
  * Every value is checked against Fluent's dark neutral background (#292827)
  * rather than against black, since that is the surface these cells sit on.
+ *
+ * The two blocks below carry the same palette twice and have to stay in step.
+ * That duplication is the standard shape for a three-state theme and it is
+ * deliberate: the attribute wins wherever the host set it, and the media query
+ * covers only the hosts that set nothing — `fluentDesignLanguage` is typed as
+ * Fluent v9 data and this is a Fluent 8 control, so it may never arrive. Where
+ * it does not, this is exactly the behaviour the control had before, which is
+ * why the fallback is a guess worth keeping rather than one worth removing.
  */
+:root[data-gcs-theme='dark'] {
+    --gcs-muted: #a19f9d;
+    --gcs-high: #6cb8f6;
+    --gcs-low: #f1707b;
+    --gcs-yes: #6bb700;
+    --gcs-no: #a19f9d;
+
+    --gcs-pill-0-bg: #123047;
+    --gcs-pill-0-fg: #9ecbf0;
+    --gcs-pill-1-bg: #10301c;
+    --gcs-pill-1-fg: #92d5a8;
+    --gcs-pill-2-bg: #3a2a12;
+    --gcs-pill-2-fg: #e5b271;
+    --gcs-pill-3-bg: #291a3d;
+    --gcs-pill-3-fg: #c4a5e8;
+    --gcs-pill-4-bg: #3b1720;
+    --gcs-pill-4-fg: #f0a3ac;
+    --gcs-pill-5-bg: #13302f;
+    --gcs-pill-5-fg: #8fc8c6;
+}
+
 @media (prefers-color-scheme: dark) {
-    :root {
+    :root:not([data-gcs-theme]) {
         --gcs-muted: #a19f9d;
         --gcs-high: #6cb8f6;
         --gcs-low: #f1707b;

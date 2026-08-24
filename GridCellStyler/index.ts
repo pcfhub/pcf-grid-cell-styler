@@ -5,6 +5,19 @@ import { cellRendererOverrides } from './customizers/CellRendererOverrides';
 import { PAOneGridCustomizer } from './types';
 
 /**
+ * The attribute the stylesheet reads to pick its palette, and the number of
+ * live controls publishing it.
+ *
+ * The count is what makes `destroy` safe. A page can hold more than one
+ * customized grid, each instantiating this control, and the attribute is global
+ * to the document — so an instance that cleared it on the way out would strip
+ * the theme from grids still on screen. The last one to leave clears it.
+ */
+const THEME_ATTRIBUTE = 'data-gcs-theme';
+
+let publishers = 0;
+
+/**
  * A grid customizer: a control whose entire output is other controls' cells.
  *
  * Nothing here renders. `updateView` returns an empty fragment on purpose, and
@@ -33,7 +46,9 @@ export class GridCellStyler
     private fired = false;
 
     public init(context: ComponentFramework.Context<IInputs>): void {
+        publishers++;
         this.fire(context);
+        this.publishTheme(context);
     }
 
     /**
@@ -56,6 +71,7 @@ export class GridCellStyler
         context: ComponentFramework.Context<IInputs>,
     ): React.ReactElement {
         this.fire(context);
+        this.publishTheme(context);
 
         return React.createElement(React.Fragment);
     }
@@ -69,7 +85,51 @@ export class GridCellStyler
     }
 
     public destroy(): void {
-        // The grid disposes the elements it mounted; nothing is held here.
+        // The grid disposes the elements it mounted; the only thing held here
+        // is the document-level theme attribute, and only until the last
+        // customized grid on the page goes with it.
+        publishers = Math.max(publishers - 1, 0);
+
+        if (publishers === 0) {
+            document.documentElement.removeAttribute(THEME_ATTRIBUTE);
+        }
+    }
+
+    /**
+     * Tell the stylesheet which theme the host is drawing in.
+     *
+     * The cells this control styles are mounted per cell with no provider and
+     * no context above them, so a renderer cannot read the theme — but the
+     * control can, and `:root` is the one element every cell of every grid
+     * reliably inherits from. The stylesheet keys its dark palette off this
+     * attribute.
+     *
+     * It used to key off `@media (prefers-color-scheme: dark)` instead, and
+     * that is the wrong signal: a model-driven app carries its own theme,
+     * independent of the operating system. A user on an OS-dark machine looking
+     * at a light app got the dark palette — which for the values painted
+     * straight onto the cell background, the empty-value dash and the currency
+     * colours, is light grey text on white. The media query survives in the CSS
+     * as a last resort for hosts that publish no theme at all, which is
+     * strictly what every host did before this method existed.
+     *
+     * `fluentDesignLanguage` is typed as Fluent v9 theming data and this is a
+     * Fluent 8 control, so the platform may simply not populate it here. That
+     * is why an absent value writes nothing rather than assuming light: leaving
+     * the attribute off is what hands the decision back to the media query,
+     * and assuming would be the same guess this method was written to stop.
+     */
+    private publishTheme(context: ComponentFramework.Context<IInputs>): void {
+        const isDarkTheme = context.fluentDesignLanguage?.isDarkTheme;
+
+        if (isDarkTheme === undefined) {
+            return;
+        }
+
+        document.documentElement.setAttribute(
+            THEME_ATTRIBUTE,
+            isDarkTheme ? 'dark' : 'light',
+        );
     }
 
     /**

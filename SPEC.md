@@ -48,11 +48,52 @@ find drift.
   mode entirely. Not observed — reasoned from the property being bound; the
   latch is cheap enough that waiting for the observation was the worse trade.
 
-- **An editor's `stopEditing` needs a latch of its own.** Closing an editor
-  blurs it, so `stopEditing(true)` on Escape is followed straight away by the
-  blur handler's `stopEditing()` — and the discard commits. Any editor that
-  both handles Escape and commits on blur has this bug; the two handlers have
-  to share a one-shot.
+- **An editor's `stopEditing` needs a latch of its own, and it has to be per
+  mount.** Closing an editor blurs it, so `stopEditing(true)` on Escape is
+  followed straight away by the blur handler's `stopEditing()` — and the discard
+  commits. Any editor that both handles Escape and commits on blur has this bug;
+  the two handlers have to share a one-shot. The first version built that
+  one-shot as a closure created inside the override function, which restores the
+  bug it prevents: the grid may call an override again for a cell that is
+  already editing, and each call starts a fresh closure at `false` and hands
+  React new handlers, so an Escape followed by a re-render followed by the blur
+  commits after all. It is a `useRef` inside the editor component now, which is
+  the lifetime the latch was always about.
+
+- **`charPress` seeds the editor; it does not stage anything.** The character
+  that opened the cell arrives in `props.charPress` and belongs in the input's
+  `defaultValue` — but the grid holds the value `stopEditing` commits, and
+  nothing has told it about that character. Type "F" to start editing, press
+  Enter, and the old value comes back, with "F" on screen the whole time. It
+  hides well: a second keystroke fires `onChange` with the whole field and the
+  bug disappears, so it only shows when the first character is also the last.
+  The fix is to stage it from a mount effect, which is also why the editors are
+  components rather than bare elements — the override function itself has to
+  stay pure.
+
+- **An editor needs a way out that is not a commit.** The yes/no editor called
+  `stopEditing` only from the `Toggle`'s `onChange`, so a user who opened the
+  cell and changed their mind had no exit: no Escape handler, and no blur,
+  because nothing had focused the toggle. The contract note about "an editor the
+  user cannot leave" was written at the top of that file and then broken one
+  editor below it. Any editor whose control does not focus itself needs an
+  explicit focus on mount, or the keyboard and focus paths it relies on never
+  fire.
+
+- **`prefers-color-scheme` is the wrong signal for a model-driven app.** The app
+  carries its own theme and the operating system's setting says nothing about
+  it, so an OS-dark machine on a light app got the dark palette: `--gcs-muted`
+  at #a19f9d on a white cell is 2.3:1, for text the light palette had
+  deliberately raised to 4.5:1. The platform signal is
+  `context.fluentDesignLanguage?.isDarkTheme` — real and typed, confirmed in
+  `@types/powerapps-component-framework`, where `FluentDesignState` carries
+  `tokenTheme`, `brand` and `isDarkTheme?`. A cell renderer has no context to
+  read it from, but the control does, so `index.ts` publishes it to `:root` as
+  `data-gcs-theme` and the stylesheet keys off that. The media query survives as
+  the fallback for hosts that publish nothing, which is what every host did
+  before. Worth knowing that no single palette could have avoided this: nothing
+  clears 4.5:1 against both #ffffff and Fluent's dark #292827, so a customizer
+  painting colour straight onto the cell background has to know the theme.
 
 ## Demo
 
@@ -76,10 +117,29 @@ double-clicking a text cell mounted the control's Fluent `TextField`.
   contract as documented plus behaviour observed in PCFHub's harness. Proving it
   needs an environment with the Power Apps grid control enabled on a table,
   `pac pcf push` or an imported solution, and the *Customizer control* property
-  set to `pcfhu_PCFHub.GridCellStyler` — the steps in `docs/installation.md`.
+  set to the control's full logical name — the steps in `docs/installation.md`.
   Specifically unproven: that the payload reaches the grid at all, that
   `colDefs`/`rowData` carry what the vendored types say, and that editors commit
   through `stopEditing` against a real record rather than a fixture row.
+
+  **The prefix in that name depends on how it got there.** `pcfhu_` is right
+  only for the packed solution, whose publisher prefix is `pcfhu`. Deploy with
+  `pac pcf push --publisher-prefix dev` and the control's logical name is
+  `dev_PCFHub.GridCellStyler`; paste the `pcfhu_` one and the grid silently
+  renders its own cells, which is indistinguishable from every other way a
+  customizer fails. Read the real name off the environment rather than
+  reconstructing it:
+  `/api/data/v9.2/customcontrols?$select=name&$filter=contains(name,'GridCellStyler')`.
+
+- **Whether `fluentDesignLanguage` is populated for a Fluent 8 control is
+  unknown.** `index.ts` publishes `data-gcs-theme` from
+  `context.fluentDesignLanguage?.isDarkTheme`, but the type package documents
+  that property as Fluent *v9* theming data, and this control declares the
+  Fluent 8 platform library. If the platform leaves it undefined the attribute
+  is never written and the stylesheet falls back to `prefers-color-scheme` —
+  no worse than before, and no better. One `console.log` in `publishTheme` on a
+  real grid settles it; until then the dark palette is only known to be
+  correctly *selectable*, not correctly *selected*.
 
 - **The Solution has not been packed.** `npm run build` compiles the bundle;
   only an msbuild pack produces the managed and unmanaged zips a release

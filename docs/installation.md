@@ -49,6 +49,21 @@ pcfhu_PCFHub.GridCellStyler
 Repeat step 2 for every table whose grid should use it. A customizer applies to
 the table's grid, not to the environment.
 
+:::callout{type=warning}
+That `pcfhu_` prefix is the **solution's** publisher prefix, so it is only the
+right answer if you imported the solution above. If you deployed the control
+yourself with `pac pcf push --publisher-prefix dev`, the control went into a
+different publisher and its logical name is `dev_PCFHub.GridCellStyler`. Pasting
+the wrong prefix is not an error — the grid just renders its own cells, exactly
+as if no customizer had been set.
+
+Read the real name out of the environment rather than assembling it:
+
+```text
+/api/data/v9.2/customcontrols?$select=name&$filter=contains(name,'GridCellStyler')
+```
+:::
+
 :::callout{type=info}
 Microsoft documents this assignment step for every grid customizer, not just
 this one:
@@ -61,8 +76,9 @@ Open the table's main grid. If the columns look unchanged:
 
 - Confirm the grid is using the **Power Apps grid control** and not the legacy
   read-only or editable grid — the customizer property only exists on the former.
-- Confirm **Customizer control** holds the full logical name above, including
-  the publisher prefix.
+- Confirm **Customizer control** holds the full logical name, with the publisher
+  prefix that matches how the control was actually deployed — see the warning
+  above, and check it against `customcontrols` rather than against this page.
 - Confirm the customizations were published after the property was set.
 
 Nothing is logged when a customizer is not assigned; the grid simply renders its
