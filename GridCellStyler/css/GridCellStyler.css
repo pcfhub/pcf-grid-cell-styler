@@ -7,7 +7,43 @@
  * Colours are literal rather than Fluent theme tokens. A cell renderer is
  * mounted per cell with no provider above it, so there is no theme context to
  * read from — see the manifest's platform-library comment.
+ *
+ * They are literal, but they are not fixed. The custom properties below are
+ * what the rules read, and the media queries at the foot of the file
+ * redefine them for dark and for forced colours. Declaring them on `:root` is
+ * safe in a way a rule on `:root` would not be: a custom property paints
+ * nothing until something reads it, every name here is `--gcs-` prefixed, and
+ * this is the only element every cell of every grid reliably inherits from.
  */
+
+:root {
+    /* Muted text: Fluent's neutralSecondary. The obvious pick is
+       neutralTertiary (#a19f9d), which is what this file used to carry — but
+       that is 2.6:1 on white and the em dash below is visible text, not
+       decoration. Secondary clears 4.5:1 and still reads as muted. */
+    --gcs-muted: #605e5c;
+
+    --gcs-high: #0f6cbd;
+    --gcs-low: #b10e1c;
+    --gcs-yes: #0e7a0b;
+    --gcs-no: #605e5c;
+
+    /* Six pairs, each a tinted background with text dark enough to stay
+       legible on it — the pills carry the option's own text, so they have to
+       pass as text rather than as decoration. */
+    --gcs-pill-0-bg: #eff6fc;
+    --gcs-pill-0-fg: #0b5394;
+    --gcs-pill-1-bg: #e9f7ef;
+    --gcs-pill-1-fg: #0e6027;
+    --gcs-pill-2-bg: #fdf3e7;
+    --gcs-pill-2-fg: #8a4b08;
+    --gcs-pill-3-bg: #f3eefc;
+    --gcs-pill-3-fg: #5b2d90;
+    --gcs-pill-4-bg: #fdeef0;
+    --gcs-pill-4-fg: #94202c;
+    --gcs-pill-5-bg: #eef4f4;
+    --gcs-pill-5-fg: #0d5c63;
+}
 
 .gcs-cell {
     display: inline-flex;
@@ -22,7 +58,7 @@
 }
 
 .gcs-empty {
-    color: #a19f9d;
+    color: var(--gcs-muted);
 }
 
 .gcs-truncate {
@@ -37,13 +73,25 @@
     font-variant-numeric: tabular-nums;
 }
 
+/*
+ * Applied only when the grid says the column is right-aligned, which it does
+ * for numeric columns. `flex-end` rather than `text-align`, because the cell is
+ * a flex container — and flex-end follows the inherited `direction`, so an RTL
+ * grid gets this right without the renderer reading `isRTLMode`.
+ */
+.gcs-right {
+    display: flex;
+    width: 100%;
+    justify-content: flex-end;
+}
+
 .gcs-high {
-    color: #0f6cbd;
+    color: var(--gcs-high);
     font-weight: 600;
 }
 
 .gcs-low {
-    color: #b10e1c;
+    color: var(--gcs-low);
 }
 
 .gcs-yes,
@@ -56,11 +104,11 @@
 }
 
 .gcs-yes {
-    color: #0e7a0b;
+    color: var(--gcs-yes);
 }
 
 .gcs-no {
-    color: #a19f9d;
+    color: var(--gcs-no);
 }
 
 .gcs-pill {
@@ -74,36 +122,36 @@
 }
 
 /* Six buckets, assigned by hash so an option keeps its colour between renders.
-   Each pair is a tinted background with text dark enough to stay legible on it
-   — the pills carry the option's own text, so they have to pass as text. */
+   Six buckets also means collisions — two options can land on one colour, which
+   docs/limitations.md names rather than hides. */
 .gcs-pill-0 {
-    background: #eff6fc;
-    color: #0b5394;
+    background: var(--gcs-pill-0-bg);
+    color: var(--gcs-pill-0-fg);
 }
 
 .gcs-pill-1 {
-    background: #e9f7ef;
-    color: #0e6027;
+    background: var(--gcs-pill-1-bg);
+    color: var(--gcs-pill-1-fg);
 }
 
 .gcs-pill-2 {
-    background: #fdf3e7;
-    color: #8a4b08;
+    background: var(--gcs-pill-2-bg);
+    color: var(--gcs-pill-2-fg);
 }
 
 .gcs-pill-3 {
-    background: #f3eefc;
-    color: #5b2d90;
+    background: var(--gcs-pill-3-bg);
+    color: var(--gcs-pill-3-fg);
 }
 
 .gcs-pill-4 {
-    background: #fdeef0;
-    color: #94202c;
+    background: var(--gcs-pill-4-bg);
+    color: var(--gcs-pill-4-fg);
 }
 
 .gcs-pill-5 {
-    background: #eef4f4;
-    color: #0d5c63;
+    background: var(--gcs-pill-5-bg);
+    color: var(--gcs-pill-5-fg);
 }
 
 .gcs-editor {
@@ -116,7 +164,9 @@
 
 /*
  * The editors sit inside a cell that is already the row's height, and Fluent's
- * own field margins would push them past it.
+ * own field margins would push them past it. This height is the fallback:
+ * `rowHeight` is optional in the customizer contract, and when the grid does
+ * supply it the editor overrides this inline.
  */
 .gcs-editor .ms-TextField-fieldGroup {
     height: 28px;
@@ -124,4 +174,62 @@
 
 .gcs-toggle.ms-Toggle {
     margin-bottom: 0;
+}
+
+/*
+ * Dark.
+ *
+ * A per-cell renderer has no theme provider to read from, which is why the
+ * colours above are literal — but that argument covers Fluent's *tokens*, not
+ * the media query, which needs nothing above it at all. Without this block a
+ * model-driven app in dark mode draws #0b5394 pill text on a #eff6fc pill
+ * inside a near-black row: legible in itself, and a bright rectangle punched
+ * through the middle of a dark grid.
+ *
+ * Every value is checked against Fluent's dark neutral background (#292827)
+ * rather than against black, since that is the surface these cells sit on.
+ */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --gcs-muted: #a19f9d;
+        --gcs-high: #6cb8f6;
+        --gcs-low: #f1707b;
+        --gcs-yes: #6bb700;
+        --gcs-no: #a19f9d;
+
+        --gcs-pill-0-bg: #123047;
+        --gcs-pill-0-fg: #9ecbf0;
+        --gcs-pill-1-bg: #10301c;
+        --gcs-pill-1-fg: #92d5a8;
+        --gcs-pill-2-bg: #3a2a12;
+        --gcs-pill-2-fg: #e5b271;
+        --gcs-pill-3-bg: #291a3d;
+        --gcs-pill-3-fg: #c4a5e8;
+        --gcs-pill-4-bg: #3b1720;
+        --gcs-pill-4-fg: #f0a3ac;
+        --gcs-pill-5-bg: #13302f;
+        --gcs-pill-5-fg: #8fc8c6;
+    }
+}
+
+/*
+ * Windows high contrast.
+ *
+ * Forced colours replace every colour in this file with a system one, so the
+ * six pill tints collapse into a single background and the currency colours
+ * into a single foreground — the two places where colour was carrying the
+ * meaning. The fix is to carry it as shape instead: a border and an underline
+ * survive forced colours, a background and a hue do not.
+ *
+ * The yes/no column needs nothing here, because its mark and its word were
+ * never colour-dependent.
+ */
+@media (forced-colors: active) {
+    .gcs-pill {
+        border: 1px solid CanvasText;
+    }
+
+    .gcs-high {
+        text-decoration: underline;
+    }
 }

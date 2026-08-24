@@ -34,7 +34,25 @@ find drift.
 
 - **A renderer returning `undefined` is the documented "use your own".** Not an
   error path, and not rare: it is how a customizer keeps the grid's own
-  virtualized rendering for the columns it has nothing to add to.
+  virtualized rendering for the columns it has nothing to add to. It is also the
+  only correct answer to every cell state a renderer cannot reproduce — a
+  validation error (whose message lives in an element `cellErrorLabelId` names
+  and the customizer does not own), an unset nullable value, a secured cell.
+  Declining is the feature, not the fallback.
+
+- **The event name is a *bound* property, so `init` is not a safe place to
+  assume it.** Microsoft's template fires only from `init`; if the platform
+  populates the property one render later, that payload is dropped for the life
+  of the grid with nothing logged. `index.ts` fires from both `init` and
+  `updateView` behind a latch, which costs one boolean and removes the failure
+  mode entirely. Not observed — reasoned from the property being bound; the
+  latch is cheap enough that waiting for the observation was the worse trade.
+
+- **An editor's `stopEditing` needs a latch of its own.** Closing an editor
+  blurs it, so `stopEditing(true)` on Escape is followed straight away by the
+  blur handler's `stopEditing()` — and the discard commits. Any editor that
+  both handles Escape and commits on blur has this bug; the two handlers have
+  to share a one-shot.
 
 ## Demo
 
@@ -66,5 +84,14 @@ double-clicking a text cell mounted the control's Fluent `TextField`.
 - **The Solution has not been packed.** `npm run build` compiles the bundle;
   only an msbuild pack produces the managed and unmanaged zips a release
   attaches, and it is the only local step that builds in production mode.
+
+- **The demo cannot exercise the cell-state guards, so a green demo is not
+  evidence for them.** The hub's harness holds `validationError` at `null` and
+  `CellEditorProps.secured` / `isRequired` at `false` — a fixture carries no
+  attribute metadata to derive them from (`docs/demo-harness-grid-customizers.md`
+  in the hub repository says so outright). So the three paths added to decline
+  an errored cell, decline a secured one, and mark a required editor are
+  reasoned from the contract and unreachable in the one place we can currently
+  watch them. They need a real grid, alongside everything above.
 
 [template]: https://github.com/microsoft/PowerApps-Samples/tree/master/component-framework/resources/GridCustomizerControlTemplate
