@@ -111,6 +111,42 @@ choice column rendered its pill, the yes/no column its mark, the date column
 (which the control declines) rendered the grid's own plain text, and
 double-clicking a text cell mounted the control's Fluent `TextField`.
 
+## Corrected after a sibling control was tested on a real grid
+
+- **An element replaces the cell's interactions, not just its pixels — and
+  every override in this file had lost editing.** Found on `pcf-grid-data-bars`,
+  on a live grid, and this control had the same defect across all four
+  overrides: nothing here wired `onCellClicked`, `startEditing` or
+  `columnEditable`.
+
+  It is worse here than there, because this control styles Text, TwoOptions and
+  OptionSet columns as well as a numeric one — the columns a user is most likely
+  to try to edit inline.
+
+  Nothing announces it and nothing local catches it, because the failure is
+  *partial*: row selection is owned by the grid and keeps working, so the cell
+  highlights, takes a focus ring and looks entirely alive while refusing to open
+  an editor. `cellHandlers` now goes on every element returned.
+
+  Two things about *where* it goes, both of which would have made the fix
+  cosmetic rather than real:
+
+  - **Not on `TooltipHost`.** Fluent 8's tooltip host renders its root `div`
+    with a fixed prop list and does not spread `getNativeProps`, so an
+    `onClick` handed to it is dropped silently. The handlers go on the `Label`
+    inside it.
+  - **Not on an element sized to its own text.** `.gcs-cell` was `inline-flex`
+    and the option-set pill is `inline-block`, so three of the five returned
+    elements shrink-wrapped their content and left the rest of the cell dead —
+    clicking the value would work and clicking beside it would not. `.gcs-cell`
+    is now full-width `flex`, and the pill has a wrapper that carries the
+    handlers. Height is deliberately left to the content, because
+    `.gcs-truncate` overrides `display` back to `block` and a fixed height there
+    would lose the vertical centring.
+
+  Unverified here: this control has not itself been run on a grid, and it has no
+  `dev/smoke.js` to assert the handlers are wired — see below.
+
 ## Not verified
 
 - **Nothing has run inside a real Power Apps grid yet.** Everything above is the
@@ -130,6 +166,15 @@ double-clicking a text cell mounted the control's Fluent `TextField`.
   customizer fails. Read the real name off the environment rather than
   reconstructing it:
   `/api/data/v9.2/customcontrols?$select=name&$filter=contains(name,'GridCellStyler')`.
+
+- **There is no `dev/smoke.js` here, and the interaction fix is exactly what one
+  would guard.** This control predates the template's dev rig, so the wiring
+  above rests on a build and a reading of the contract rather than on an
+  assertion. `pcf-grid-data-bars` covers the same three facts — the click is
+  forwarded, double-click opens the editor when `columnEditable`, a read-only
+  column gets no edit gesture — in three assertions against its built bundle.
+  Adopting `dev/harness.html` and `dev/smoke.js` from `_template` would bring
+  those here.
 
 - **Whether `fluentDesignLanguage` is populated for a Fluent 8 control is
   unknown.** `index.ts` publishes `data-gcs-theme` from

@@ -33,6 +33,12 @@ import {
  * override below declines an unset cell rather than drawing it as "No", and why
  * the currency override restyles the platform's formatted value instead of
  * formatting one of its own.
+ *
+ * A fourth rule the documentation does not state, and this file shipped without:
+ * an element replaces the cell's **interactions** as well as its pixels, and the
+ * one that goes is editing. Every element returned below carries
+ * `cellHandlers(props)` — see its comment for what that restores and why its
+ * absence is so hard to see.
  */
 export const cellRendererOverrides: CellRendererOverrides = {
     /**
@@ -53,7 +59,11 @@ export const cellRendererOverrides: CellRendererOverrides = {
 
         if (value === '') {
             return (
-                <Label className="gcs-cell gcs-empty" aria-label="No value">
+                <Label
+                    className="gcs-cell gcs-empty"
+                    aria-label="No value"
+                    {...cellHandlers(props)}
+                >
                     &mdash;
                 </Label>
             );
@@ -63,9 +73,18 @@ export const cellRendererOverrides: CellRendererOverrides = {
             return undefined;
         }
 
+        // The handlers go on the `Label`, not on the `TooltipHost`. Fluent 8's
+        // tooltip host renders its root `div` with a fixed prop list —
+        // `className`, `ref`, the focus and mouse handlers it needs itself —
+        // and does **not** spread `getNativeProps`, so an `onClick` handed to
+        // it is dropped without a word. Putting them on the child is what makes
+        // them run; the child is `display: block` at full width, so it covers
+        // the host.
         return (
             <TooltipHost content={value}>
-                <Label className="gcs-cell gcs-truncate">{value}</Label>
+                <Label className="gcs-cell gcs-truncate" {...cellHandlers(props)}>
+                    {value}
+                </Label>
             </TooltipHost>
         );
     },
@@ -102,6 +121,7 @@ export const cellRendererOverrides: CellRendererOverrides = {
             <Label
                 className={`gcs-cell gcs-number ${high ? 'gcs-high' : 'gcs-low'}${alignment}`}
                 aria-label={`${props.formattedValue ?? String(value)}. ${label}.`}
+                {...cellHandlers(props)}
             >
                 {props.formattedValue}
             </Label>
@@ -143,7 +163,7 @@ export const cellRendererOverrides: CellRendererOverrides = {
         const on = props.value === true;
 
         return (
-            <Label className="gcs-cell gcs-boolean">
+            <Label className="gcs-cell gcs-boolean" {...cellHandlers(props)}>
                 <span aria-hidden="true" className={on ? 'gcs-yes' : 'gcs-no'}>
                     {on ? '✓' : '×'}
                 </span>
@@ -172,11 +192,59 @@ export const cellRendererOverrides: CellRendererOverrides = {
             return undefined;
         }
 
+        // The pill is `inline-block` and sized to its text, so it cannot carry
+        // the handlers on its own — a click in the space beside it would land
+        // on the grid's cell and do nothing. The wrapper is what makes the
+        // whole cell clickable, exactly as the grid's own cell is; the pill
+        // keeps its own box inside it.
         return (
-            <span className={`gcs-pill gcs-pill-${hueOf(value)}`}>{value}</span>
+            <span className="gcs-cell" {...cellHandlers(props)}>
+                <span className={`gcs-pill gcs-pill-${hueOf(value)}`}>{value}</span>
+            </span>
         );
     },
 };
+
+/**
+ * Everything the cell this override replaced was doing besides drawing.
+ *
+ * Returning an element replaces the grid's own cell **and its interactions**,
+ * and the one that goes is editing. Row selection survives, because the grid
+ * owns the row — so the cell still highlights, takes a focus ring and looks
+ * entirely alive while refusing to open an editor. A user clicks a value they
+ * can see is editable and nothing happens, on every column this file styles,
+ * with nothing logged. This shipped that way: the failure is partial, which is
+ * why it survives review and a screenshot alike.
+ *
+ * This is what those three fields on `CellRendererProps` are for.
+ * `onCellClicked` is documented as "callback indicating the grid cell has been
+ * clicked" — once an override has drawn its own element, nothing else can raise
+ * it. `startEditing` opens the editor directly, and `columnEditable` says
+ * whether there is one to open. Both gestures are wired because which one the
+ * grid turns into an edit is its own business and can differ between a grid
+ * with *Enable editing* set and one without; `startEditing` on a cell already
+ * editing is a no-op, so the overlap costs nothing.
+ *
+ * No `tabIndex` and no key handlers. The grid owns cell focus and keyboard
+ * navigation at the row level — Enter and F2 never reached this element — and a
+ * tabbable node inside a cell adds a second stop to a roving-tabindex surface a
+ * customizer does not own.
+ *
+ * Spread this onto the element that *fills* the cell. `.gcs-cell` is what makes
+ * one fill it; an element sized to its own text leaves the rest of the cell
+ * dead, which is a quieter version of the same bug.
+ */
+function cellHandlers(props: CellRendererProps): {
+    onClick?: (event: React.MouseEvent<HTMLElement>) => void;
+    onDoubleClick?: () => void;
+} {
+    return {
+        onClick: props.onCellClicked,
+        onDoubleClick: props.columnEditable
+            ? () => props.startEditing?.()
+            : undefined,
+    };
+}
 
 /** The magnitude a currency value has to reach before it reads as high. */
 const HIGH_VALUE = 100000;

@@ -45,8 +45,25 @@
     --gcs-pill-5-fg: #0d5c63;
 }
 
+/*
+ * `flex` at full width rather than `inline-flex`, and the width is the point.
+ *
+ * These elements replace the grid's own cell, and with it the click that opens
+ * an editor — which the renderers hand back by forwarding `onCellClicked`. A
+ * handler only fires where the element actually is, so an element shrink-wrapped
+ * to its own text leaves the rest of the cell dead: clicking the value works,
+ * clicking the space beside it does nothing, and the column reads as
+ * intermittently broken rather than broken.
+ *
+ * No `height`, deliberately. `.gcs-truncate` overrides `display` back to
+ * `block` for its ellipsis, which would lose the vertical centring that
+ * `align-items` gives the others — and with the height left to the content the
+ * line box is the same one the grid drew, so every variant sits where an
+ * untouched cell beside it does.
+ */
 .gcs-cell {
-    display: inline-flex;
+    display: flex;
+    width: 100%;
     align-items: center;
     gap: 6px;
     padding: 0;
