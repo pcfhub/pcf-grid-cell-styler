@@ -1,6 +1,6 @@
 {
   "name": "pcf-grid-cell-styler",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Fluent cell renderers and editors for the Power Apps grid, driven by column type.",
   "license": "MIT",
   "private": true,

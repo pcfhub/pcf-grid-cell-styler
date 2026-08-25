@@ -27,7 +27,7 @@ let publishers = 0;
  *
  * Assigned to a grid rather than dropped on a form: Settings → Customizations →
  * the table → Controls → Power Apps grid control → *Customizer control* =
- * `pcfhu_PCFHub.GridCellStyler`. See docs/installation.md — a customizer that is
+ * `pcfhub_PCFHub.GridCellStyler`. See docs/installation.md — a customizer that is
  * built and imported but never named on a grid is silently inert, which is the
  * single most common way this kind of control appears broken.
  *

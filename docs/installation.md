@@ -43,14 +43,14 @@ The full logical name is `{publisher prefix}_{namespace}.{control name}`, which
 for the shipped solution is:
 
 ```text
-pcfhu_PCFHub.GridCellStyler
+pcfhub_PCFHub.GridCellStyler
 ```
 
 Repeat step 2 for every table whose grid should use it. A customizer applies to
 the table's grid, not to the environment.
 
 :::callout{type=warning}
-That `pcfhu_` prefix is the **solution's** publisher prefix, so it is only the
+That `pcfhub_` prefix is the **solution's** publisher prefix, so it is only the
 right answer if you imported the solution above. If you deployed the control
 yourself with `pac pcf push --publisher-prefix dev`, the control went into a
 different publisher and its logical name is `dev_PCFHub.GridCellStyler`. Pasting

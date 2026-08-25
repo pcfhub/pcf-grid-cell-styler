@@ -122,10 +122,10 @@ double-clicking a text cell mounted the control's Fluent `TextField`.
   `colDefs`/`rowData` carry what the vendored types say, and that editors commit
   through `stopEditing` against a real record rather than a fixture row.
 
-  **The prefix in that name depends on how it got there.** `pcfhu_` is right
-  only for the packed solution, whose publisher prefix is `pcfhu`. Deploy with
+  **The prefix in that name depends on how it got there.** `pcfhub_` is right
+  only for the packed solution, whose publisher prefix is `pcfhub`. Deploy with
   `pac pcf push --publisher-prefix dev` and the control's logical name is
-  `dev_PCFHub.GridCellStyler`; paste the `pcfhu_` one and the grid silently
+  `dev_PCFHub.GridCellStyler`; paste the `pcfhub_` one and the grid silently
   renders its own cells, which is indistinguishable from every other way a
   customizer fails. Read the real name off the environment rather than
   reconstructing it:
