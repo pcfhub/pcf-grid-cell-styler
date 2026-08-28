@@ -12,7 +12,8 @@
     "rebuild": "pcf-scripts rebuild",
     "start": "pcf-scripts start",
     "refreshTypes": "pcf-scripts refreshTypes",
-    "lint": "eslint GridCellStyler --ext .ts,.tsx"
+    "lint": "eslint GridCellStyler --ext .ts,.tsx",
+    "smoke": "node dev/smoke.js"
   },
   "devDependencies": {
     "@fluentui/react": "8.121.1",
