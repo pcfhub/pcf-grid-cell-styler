@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Grid Cell Styler — dev harness</title>
+
+        <!--
+            A stand-in for the Power Apps grid, and the only place this control
+            can be seen at all.
+
+            A cell customizer renders nothing on its own: it hands the grid a
+            payload of overrides and the grid decides what to do with them.
+            `npm start` therefore shows an empty box — there is no grid in it —
+            and `npm run smoke` asserts what the overrides return without ever
+            drawing one. This page is the third thing: a fake grid that calls
+            the overrides the way the real one does and puts the results on
+            screen.
+
+            **What it is not.** Every value below comes from this file. It
+            cannot tell you that the real grid passes what this passes, that a
+            tooltip behaves the same inside the grid's own virtualised rows, or
+            that a declined cell looks like the neighbours it sits between.
+            Those belong in SPEC.md under "Not verified".
+
+            Open it directly — there is no server script and it does not need one.
+            Nothing here fetches: the fixture is inline and every path is
+            relative, so `file://` works. That is deliberate, and it is why this
+            page has no `npm run harness` behind it the way the field and dataset
+            harnesses do; those load a fixture with `fetch`, which `file://`
+            refuses.
+        -->
+
+        <link rel="stylesheet" href="../GridCellStyler/css/GridCellStyler.css" />
+        <style>
+            body {
+                margin: 0;
+                padding: 24px;
+                font-family: 'Segoe UI', system-ui, sans-serif;
+                font-size: 14px;
+                background: #faf9f8;
+                color: #323130;
+            }
+
+            body.is-dark {
+                background: #1b1a19;
+                color: #f3f2f1;
+            }
+
+            h1 {
+                font-size: 18px;
+                margin: 0 0 4px;
+            }
+
+            .harness-note {
+                margin: 0 0 24px;
+                color: #605e5c;
+            }
+
+            body.is-dark .harness-note {
+                color: #a19f9d;
+            }
+
+            .harness-controls {
+                display: flex;
+                gap: 16px;
+                align-items: center;
+                flex-wrap: wrap;
+                margin-bottom: 24px;
+                padding: 12px 16px;
+                background: #fff;
+                border: 1px solid #edebe9;
+                border-radius: 4px;
+            }
+
+            body.is-dark .harness-controls {
+                background: #292827;
+                border-color: #3b3a39;
+            }
+
+            #harness-status {
+                color: #605e5c;
+            }
+
+            body.is-dark #harness-status {
+                color: #a19f9d;
+            }
+
+            .harness-grid {
+                background: #fff;
+                border: 1px solid #edebe9;
+                border-radius: 4px;
+                overflow: hidden;
+                width: max-content;
+                max-width: 100%;
+            }
+
+            body.is-dark .harness-grid {
+                background: #292827;
+                border-color: #3b3a39;
+            }
+
+            .harness-headrow,
+            .harness-row {
+                display: grid;
+                border-bottom: 1px solid #f3f2f1;
+            }
+
+            body.is-dark .harness-headrow,
+            body.is-dark .harness-row {
+                border-bottom-color: #3b3a39;
+            }
+
+            .harness-headrow {
+                font-weight: 600;
+                background: #faf9f8;
+            }
+
+            body.is-dark .harness-headrow {
+                background: #201f1e;
+            }
+
+            .harness-row:nth-child(even) {
+                background: #fbfbfa;
+            }
+
+            body.is-dark .harness-row:nth-child(even) {
+                background: #252423;
+            }
+
+            .harness-cell {
+                /* A flex item defaults to a content-based minimum, so without this a
+                   cell that should ellipsis-truncate wraps and overflows the row
+                   instead — which is the control declining to truncate, exactly
+                   backwards. */
+                min-width: 0;
+                padding: 0 12px;
+                height: 42px;
+                display: flex;
+                align-items: center;
+                overflow: hidden;
+                border-right: 1px solid #f3f2f1;
+            }
+
+            body.is-dark .harness-cell {
+                border-right-color: #3b3a39;
+            }
+
+            /*
+                A cell the control declined to render, drawn the plain way the
+                grid would draw it. Marked, because "returns undefined" is a
+                decision this control makes on most cells and a page that hid it
+                would misrepresent what the control does.
+            */
+            .harness-declined {
+                color: #605e5c;
+            }
+
+            body.is-dark .harness-declined {
+                color: #a19f9d;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>Grid Cell Styler — dev harness</h1>
+        <p class="harness-note">
+            A stand-in for the Power Apps grid. Run <code>npm run build</code>
+            first; reload after every build. Cells in grey are ones the control
+            handed back to the grid untouched.
+        </p>
+
+        <div class="harness-controls">
+            <label>
+                <input type="checkbox" id="harness-dark" />
+                Dark theme
+            </label>
+            <label>
+                <input type="checkbox" id="harness-named" checked />
+                The grid supplied an event name
+            </label>
+            <span id="harness-status"></span>
+        </div>
+
+        <div id="harness-root"></div>
+
+        <!--
+            React and Fluent before the bundle, and under the global names the
+            platform uses. `<platform-library>` compiles them out of the bundle
+            into externals — `Reactv16` and `FluentUIReactv81211` — so without
+            these aliases the bundle throws on its first import with a name that
+            appears nowhere in this repository.
+
+            **This is only possible because a grid customizer is Fluent 8.**
+            Fluent 8 ships a UMD build; `@fluentui/react-components` (Fluent 9)
+            does not, which is why the React field and dataset controls in this
+            house have no harness page and this one does.
+
+            The development builds rather than the minified ones: this is a
+            debugging surface, and React's development build is where the
+            warnings live.
+        -->
+        <script src="../node_modules/react/umd/react.development.js"></script>
+        <script src="../node_modules/react-dom/umd/react-dom.development.js"></script>
+        <script src="../node_modules/@fluentui/react/dist/fluentui-react.umd.js"></script>
+        <script>
+            window.Reactv16 = window.React;
+            window.FluentUIReactv81211 = window.FluentUIReact;
+        </script>
+
+        <script src="harness.js"></script>
+        <script src="../out/controls/GridCellStyler/bundle.js"></script>
+        <script>
+            window.__harnessStart();
+        </script>
+    </body>
+</html>

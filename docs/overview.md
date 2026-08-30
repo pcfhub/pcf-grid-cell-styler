@@ -9,6 +9,8 @@ order: 1
 A **grid customizer**: it changes how the Power Apps grid control draws and
 edits its cells, without replacing the grid.
 
+::image{src=media/screenshot.png alt="A grid whose text cells truncate, currency cells colour by magnitude, yes/no cells show a tick or a cross, and choice cells render as coloured pills" zoom}
+
 Assign it to a table's grid and every text, currency, yes/no and choice column
 on that grid renders through this control instead of the built-in renderer — a
 credit limit above 100,000 in blue and below it in red, choices as coloured

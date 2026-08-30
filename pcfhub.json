@@ -1,12 +1,15 @@
 {
   "schemaVersion": 1,
-
   "slug": "pcf-grid-cell-styler",
   "name": "Grid Cell Styler",
   "tagline": "Fluent cell renderers and editors for the Power Apps grid, driven by column type.",
   "category": "grids",
-  "tags": ["react", "fluent-ui", "model-driven", "grids"],
-
+  "tags": [
+    "react",
+    "fluent-ui",
+    "model-driven",
+    "grids"
+  ],
   "control": {
     "namespace": "PCFHub",
     "constructor": "GridCellStyler",
@@ -14,27 +17,28 @@
     "framework": "react_virtual",
     "manifestPath": "GridCellStyler/ControlManifest.Input.xml"
   },
-
   "links": {
     "homepage": "https://github.com/pcfhub/pcf-grid-cell-styler",
     "support": "https://github.com/pcfhub/pcf-grid-cell-styler/issues",
     "license": "MIT"
   },
-
   "docs": {
     "path": "docs"
   },
-
   "media": {
     "logo": "media/logo.png",
-    "screenshots": []
+    "screenshots": [
+      "media/screenshot.png",
+      "media/screenshot-dark.png"
+    ]
   },
-
   "demo": {
     "fidelity": "mocked",
     "host": "grid",
     "bundle": "out/controls/GridCellStyler/bundle.js",
-    "styles": ["out/controls/GridCellStyler/css/GridCellStyler.css"],
+    "styles": [
+      "out/controls/GridCellStyler/css/GridCellStyler.css"
+    ],
     "datasetFixture": "demo/accounts.json",
     "limitations": [
       "The grid is PCFHub's stand-in, not the Power Apps grid — cell renderers and editors run for real, the surrounding grid does not.",
