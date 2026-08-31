@@ -13,7 +13,7 @@
   "control": {
     "namespace": "PCFHub",
     "constructor": "GridCellStyler",
-    "type": "virtual",
+    "type": "grid_customizer",
     "framework": "react_virtual",
     "manifestPath": "GridCellStyler/ControlManifest.Input.xml"
   },
