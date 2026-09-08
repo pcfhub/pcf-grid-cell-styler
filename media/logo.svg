@@ -1,20 +1,37 @@
 <svg width="96" height="96" viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Template placeholder. The top face of the PCFHub mark on its own: one
-       component rather than the whole stack.
+  <!-- Four cells, and one of them rendered.
 
-       Geometry, ramp and inner diamond are the original's verbatim, shifted
-       down 19 so a face that sits at the top of the full mark is centred when
-       it stands alone. The gradient is declared in userSpaceOnUse, so its
-       coordinates move by the same 19; leaving them at the original 29 and 9
-       would slide the ramp off the shape.
+       The control swaps the grid's own cell renderer for a Fluent one chosen by
+       column type, so the mark is cells where one is a different SHAPE, not a
+       different colour: three plain cells held back, and the fourth drawn as
+       the pill a choice column ends up as. Shape carries at 24 where a tint
+       does not.
+
+       The ramp is the PCFHub mark's own, verbatim, so this sits in the family rather
+       than beside it. Declared in userSpaceOnUse and spanning the whole 96
+       canvas, so the mark reads as one object lit from the top right.
+
+       Drawn for 32px. The first attempt drew the grid as two thin rules at 0.4
+       and put the styled cell in a quadrant, which is a PLUS SIGN with a bar
+       beside it, and at 32 the mark read as "add". Cells as filled rectangles
+       have no centre for the eye to find.
 
        Note: no double hyphen may appear in this comment, or the whole document
        fails to parse as XML. -->
   <defs>
-    <linearGradient id="mark-top" x1="8" y1="48" x2="88" y2="28" gradientUnits="userSpaceOnUse">
+    <linearGradient id="grid-cell-styler-ramp" x1="6" y1="82" x2="90" y2="14" gradientUnits="userSpaceOnUse">
       <stop stop-color="#A684FF"/><stop offset="0.6" stop-color="#7C86FF"/><stop offset="1" stop-color="#00BCFF"/>
     </linearGradient>
   </defs>
-  <path d="M48 28 88 48 48 68 8 48Z" fill="url(#mark-top)"/>
-  <path d="M48 41.5 61 48 48 54.5 35 48Z" fill="#F8FAFC" fill-opacity="0.92"/>
+  <!-- The grid. -->
+  <rect x="6" y="14" width="84" height="68" rx="16" fill="url(#grid-cell-styler-ramp)"/>
+
+  <!-- Three cells as the grid draws them. -->
+  <rect x="17" y="26" width="28" height="18" rx="5" fill="#F8FAFC" fill-opacity="0.35"/>
+  <rect x="51" y="26" width="28" height="18" rx="5" fill="#F8FAFC" fill-opacity="0.35"/>
+  <rect x="17" y="52" width="28" height="18" rx="5" fill="#F8FAFC" fill-opacity="0.35"/>
+
+  <!-- The fourth, rendered. Inset and fully round: a different shape, which is
+       what a renderer actually changes. -->
+  <rect x="51" y="54" width="28" height="14" rx="7" fill="#F8FAFC"/>
 </svg>
