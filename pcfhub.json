@@ -4,10 +4,10 @@
   "name": "Grid Cell Styler",
   "tagline": "Fluent cell renderers and editors for the Power Apps grid, driven by column type.",
   "category": "grids",
+  "hosts": ["model-driven"],
   "tags": [
     "react",
     "fluent-ui",
-    "model-driven",
     "grids"
   ],
   "control": {
