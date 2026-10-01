@@ -3,6 +3,7 @@
   "slug": "pcf-grid-cell-styler",
   "name": "Grid Cell Styler",
   "tagline": "Fluent cell renderers and editors for the Power Apps grid, driven by column type.",
+  "summary": "A grid customizer: it changes how the Power Apps grid draws and edits its cells, without replacing the grid. It is assigned to a table's grid rather than placed on a form.\n\n- Text: long values truncated, with the full value in a tooltip\n- Currency: coloured above and below a threshold of 100,000\n- Yes/No: a mark beside the word, edited with a toggle\n- Choice: coloured pills\n\nModel-driven apps only, and one grid takes one customizer.",
   "category": "grids",
   "hosts": ["model-driven"],
   "tags": [
