@@ -11,6 +11,8 @@
     "fluent-ui",
     "grids"
   ],
+  "supportLevel": "reference",
+  "builtWith": "ai",
   "control": {
     "namespace": "PCFHub",
     "constructor": "GridCellStyler",

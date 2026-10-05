@@ -2,6 +2,8 @@
 
 Fluent cell renderers and editors for the Power Apps grid, driven by column type.
 
+> **Reference example · built with AI.** This control was written with AI (Claude) and tested on a live Dataverse form; its code has not been reviewed line by line. It is published as a worked example and is not maintained — read the source and [`SPEC.md`](SPEC.md) (what was measured on the form) before you use it. Fixes are not guaranteed.
+
 [![Build](https://github.com/pcfhub/pcf-grid-cell-styler/actions/workflows/build.yml/badge.svg)](https://github.com/pcfhub/pcf-grid-cell-styler/actions/workflows/build.yml)
 [![Release](https://github.com/pcfhub/pcf-grid-cell-styler/actions/workflows/release.yml/badge.svg)](https://github.com/pcfhub/pcf-grid-cell-styler/actions/workflows/release.yml)
 
@@ -10,7 +12,6 @@ Fluent cell renderers and editors for the Power Apps grid, driven by column type
 Documentation lives on [PCFHub](https://pcfhub.dev/components/pcf-grid-cell-styler), built
 from the `docs/` directory in this repository. Edit the Markdown here; the hub
 recompiles it.
-
 
 ## What it does
 
@@ -36,7 +37,6 @@ returns an element only for empty values and long ones; the Currency override
 only for numeric cells. Replacing every cell on every column would cost the grid
 its own virtualized rendering for no visible difference.
 
-
 ## Properties
 
 | Property | Type | Usage | Default | What it controls |
@@ -58,7 +58,6 @@ the overrides return are rendered by the host's own React instance, which is the
 only way their hooks can work. No `uses-feature` permissions are requested: the
 control reaches no Web API, no device, and no navigation.
 
-
 ## On the hub
 
 `mocked`, and the reason is the surface rather than the control.
@@ -74,7 +73,6 @@ The single preset covers each column type the control overrides — text (short,
 long and empty), currency either side of the threshold, a choice column and a
 yes/no column — plus a date column it deliberately declines, so the fallback to
 the grid's own rendering is visible beside the customized cells.
-
 
 ## Install
 

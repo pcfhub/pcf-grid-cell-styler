@@ -9,6 +9,10 @@ order: 1
 A **grid customizer**: it changes how the Power Apps grid control draws and
 edits its cells, without replacing the grid.
 
+:::callout{type=warning}
+**Reference example · built with AI.** This control was written with AI (Claude) and tested on a live Dataverse form; its code has not been reviewed line by line. It is published as a worked example and is not maintained — read the source and [SPEC.md](https://github.com/pcfhub/pcf-grid-cell-styler/blob/main/SPEC.md) (what was measured on the form) before you use it. Fixes are not guaranteed.
+:::
+
 ::image{src=media/screenshot.png alt="A grid whose text cells truncate, currency cells colour by magnitude, yes/no cells show a tick or a cross, and choice cells render as coloured pills" zoom}
 
 Assign it to a table's grid and every text, currency, yes/no and choice column
